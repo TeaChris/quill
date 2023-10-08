@@ -19,6 +19,7 @@ export const appRouter = router({
       },
     })
 
+    // if there is no user
     if (!dbUser) {
       // create a new user in db
       await db.user.create({
@@ -79,6 +80,22 @@ export const appRouter = router({
         },
       })
       return file
+    }),
+
+  // get file upload status
+  getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
+          id: input.fileId,
+          userId: ctx.userId,
+        },
+      })
+
+      if (!file) return { status: 'PENDING' as const }
+
+      return { status: file.uploadStatus }
     }),
 })
 
