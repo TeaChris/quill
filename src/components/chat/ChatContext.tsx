@@ -17,10 +17,10 @@ export const ChatContext = createContext<StreamResponse>({
 })
 
 interface Props {
-  field: string
+  fileId: string
   children: ReactNode
 }
-export const ChatContexrProvider = ({ field, children }: Props) => {
+export const ChatContextProvider = ({ fileId, children }: Props) => {
   const [message, setMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -30,23 +30,34 @@ export const ChatContexrProvider = ({ field, children }: Props) => {
     mutationFn: async ({ message }: { message: string }) => {
       const response = await fetch('/api/message', {
         method: 'POST',
-        body: JSON.stringify({ field, message }),
+        body: JSON.stringify({
+          fileId,
+          message,
+        }),
       })
-      if (!response) {
+
+      if (!response.ok) {
         throw new Error('Failed to send message')
       }
+
       return response.body
     },
   })
 
-  const addMessage = () => sendMessage({ message })
-  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(event.target.value)
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value)
   }
+
+  const addMessage = () => sendMessage({ message })
 
   return (
     <ChatContext.Provider
-      value={{ addMessage, message, handleInputChange, isLoading }}
+      value={{
+        addMessage,
+        message,
+        handleInputChange,
+        isLoading,
+      }}
     >
       {children}
     </ChatContext.Provider>
